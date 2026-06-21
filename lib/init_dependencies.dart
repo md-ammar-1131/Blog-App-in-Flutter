@@ -3,6 +3,7 @@ import 'package:blog_app/feautures/auth/data/datasources/auth_remote_data_source
 import 'package:blog_app/feautures/auth/data/repositories/auth_reposit_impl.dart';
 import 'package:blog_app/feautures/auth/domain/repository/auth_repository.dart';
 import 'package:blog_app/feautures/auth/domain/usecases/user_Sign_up.dart';
+import 'package:blog_app/feautures/auth/domain/usecases/user_login.dart';
 import 'package:blog_app/feautures/auth/presentation/bloc/auth_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'
@@ -13,9 +14,7 @@ final serviceLocator = GetIt.instance;
 
 Future<void> initDependencies() async {
   _initAuth(); //registered dependencies are called here
-//FIRSTLY PULL SUPABSE FROM MAIN TO HERE SO THAT SERVICELOACTOR CAN GET IT FROM HERE DIRECTY
-
-
+  //FIRSTLY PULL SUPABSE FROM MAIN TO HERE SO THAT SERVICELOACTOR CAN GET IT FROM HERE DIRECTY
 
   final supabase = await Supabase.initialize(
     url: Secrets.supabaseUrl,
@@ -48,11 +47,11 @@ void _initAuth() {
   serviceLocator.registerFactory(() => UserSignUp(serviceLocator()));
   //authbloc one state as one state of bloc is only requried at particluar time so noe new instance is required so lazy singleton reigisteratoin isued here
 
+  serviceLocator.registerFactory(() => UserLogin(serviceLocator()));
+
   serviceLocator.registerLazySingleton(
-    () => AuthBloc(userSignUp: serviceLocator()),
-
+    () => AuthBloc(userSignUp: serviceLocator(), userLogin: serviceLocator()),
   );
-
 
   //to use the dependency we must need to first register that depe.. here and then calling or using that dependency becomes easier like we have done by dircly cally serivcelocator();
 }

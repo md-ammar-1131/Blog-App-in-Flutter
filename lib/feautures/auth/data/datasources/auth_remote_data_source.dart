@@ -4,7 +4,7 @@
 import 'package:blog_app/core/errors/exceptions.dart';
 import 'package:blog_app/feautures/auth/data/models/user_models.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
+//  this IS THE MAIN PAGE WHERE WE HAVE IMPLEMENTED THE SUPABASE CLIENT THING TO GET DATA OF USER FROM DSTABASE
 abstract interface class AuthRemoteDataSource {
   Future<UserModels> signUpWithEmailPassword({
     required String name,
