@@ -1,0 +1,10 @@
+NOW WE ARE CONNECTING THE AUTH BLOC
+
+
+
+dependecny injection-getit help in dependecny injection in which we can diectly pass
+ the dependecies
+//this is knows as registering dependency
+
+//next thing is to store user data to database
+//foreign key id connects auth.user with profiles this key connects two differtn tables foreign key it is two table connector

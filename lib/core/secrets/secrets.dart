@@ -1,0 +1,4 @@
+class Secrets {
+  static const supabaseUrl='https://aevtknovppstyirvnlvk.supabase.co';
+  static const supabaseAnon='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFldnRrbm92cHBzdHlpcnZubHZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExOTU2OTksImV4cCI6MjA5Njc3MTY5OX0.OQ9zxd-ZjkHq3OLXR3NxLGr0pLHqhaBBs17HB8rW2Eo';
+}
