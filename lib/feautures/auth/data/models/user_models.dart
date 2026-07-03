@@ -1,4 +1,4 @@
-import 'package:blog_app/feautures/auth/domain/entities/user.dart';
+import 'package:blog_app/core/common/entities/user.dart';
 
 class UserModels extends User{
   UserModels({required super.name, required super.email, required super.id});
@@ -6,7 +6,7 @@ class UserModels extends User{
   //liskov substitution is entity with  model and model with eneity replacement can occur easily
   
 
-//wer will write json repson to user model
+//wer will write json  to user model
 /*
 
 
@@ -27,6 +27,7 @@ Database (JSON)
  
   */
 
+//this will model the kachra came from the api
 factory UserModels.fromJson(Map<String,dynamic>map){
 return UserModels(name: map['name']??'', email: map['email']?? '', id: map['id'] ??'');
 }

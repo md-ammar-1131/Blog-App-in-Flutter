@@ -5,3 +5,6 @@ abstract interface class Usecase <SucessType,Params>{
   Future<Either<Failures,SucessType>>call(Params params);
 
 }
+class NoParams{
+  
+}

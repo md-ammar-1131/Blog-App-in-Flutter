@@ -1,7 +1,7 @@
 
 import 'package:blog_app/core/errors/failures.dart';
 import 'package:blog_app/core/usecase/usecase.dart';
-import 'package:blog_app/feautures/auth/domain/entities/user.dart';
+import 'package:blog_app/core/common/entities/user.dart';
 import 'package:blog_app/feautures/auth/domain/repository/auth_repository.dart';
 // ignore: implementation_imports
 import 'package:fpdart/src/either.dart';

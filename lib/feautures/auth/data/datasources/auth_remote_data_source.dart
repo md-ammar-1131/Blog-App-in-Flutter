@@ -4,8 +4,11 @@
 import 'package:blog_app/core/errors/exceptions.dart';
 import 'package:blog_app/feautures/auth/data/models/user_models.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 //  this IS THE MAIN PAGE WHERE WE HAVE IMPLEMENTED THE SUPABASE CLIENT THING TO GET DATA OF USER FROM DSTABASE
 abstract interface class AuthRemoteDataSource {
+  Session? get currentUserSession;
+
   Future<UserModels> signUpWithEmailPassword({
     required String name,
     required String email,
@@ -15,12 +18,19 @@ abstract interface class AuthRemoteDataSource {
     required String email,
     required String password,
   });
+  //for user session
+
+  Future<UserModels?> getCurrentUserData();
 }
 
 class AuthRemoteDataSourceImplementation implements AuthRemoteDataSource {
   final SupabaseClient
   supabaseClient; //THIS FILE WILL REGAIN DATA FROM THE SUPABASE SERVER
   //no dependency between class and supabase  and second reaseonf is of testing why we are not directly passing client but taking in constructor
+  @override
+  Session? get currentUserSession => supabaseClient.auth.currentSession;
+  //this is session method to check if user is still logged in
+  //so we will fetch dat from database
 
   AuthRemoteDataSourceImplementation(this.supabaseClient);
 
@@ -63,6 +73,28 @@ class AuthRemoteDataSourceImplementation implements AuthRemoteDataSource {
       }
       return UserModels.fromJson(response.user!.toJson());
       //we are foing to do this if only user is not null
+    } catch (e) {
+      throw ServerExceptions(e.toString());
+    }
+  }
+
+  @override
+  Future<UserModels?> getCurrentUserData() async {
+    try {
+      if (currentUserSession != null) {
+        // [{},{},{}]
+        final userData = await supabaseClient
+            .from('profiles')
+            .select()
+            .eq(
+              'id',
+              currentUserSession!.user.id,
+            ); //'*' means all vlaues //this will direclyu talking to data base 'profile' table
+        return UserModels.fromJson(
+          userData.first,
+        ); //this is beacuse this userdata list has only one session currenlty logged in or only one user or only on etable specifying the current user logged due to that eq. in userdata varibale
+      }
+      return null;
     } catch (e) {
       throw ServerExceptions(e.toString());
     }

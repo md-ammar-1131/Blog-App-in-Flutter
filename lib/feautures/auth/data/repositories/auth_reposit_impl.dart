@@ -1,8 +1,7 @@
-
 import 'package:blog_app/core/errors/exceptions.dart';
 import 'package:blog_app/core/errors/failures.dart';
 import 'package:blog_app/feautures/auth/data/datasources/auth_remote_data_source.dart';
-import 'package:blog_app/feautures/auth/domain/entities/user.dart';
+import 'package:blog_app/core/common/entities/user.dart';
 import 'package:blog_app/feautures/auth/domain/repository/auth_repository.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as sb;
@@ -12,6 +11,21 @@ class AuthRepositImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
 
   AuthRepositImpl(this.remoteDataSource);
+  @override
+  Future<Either<Failures, User>> currentUser() async {
+    try {
+      //AGAR MAIN DOBARA  APP PE AAOUN TO JO LAST LOGGED IN USER THA WO ALREADY AGAIN LGOGED IN HO JAYE
+      
+      final user = await remoteDataSource.getCurrentUserData();
+      if (user == null) {
+        return left(Failures('User Not logged in!'));
+      }
+
+      return right(user);
+    } on ServerExceptions catch (e) {
+      throw (Failures(e.message));
+    }
+  }
 
   @override
   Future<Either<Failures, User>> loginWithEmailPassowrd({
@@ -42,25 +56,20 @@ class AuthRepositImpl implements AuthRepository {
   }
 
   // Common handler for login/signup
-  Future<Either<Failures, User>> _getUser(
-    Future<User> Function() fn,
-  ) async {
+  Future<Either<Failures, User>> _getUser(Future<User> Function() fn) async {
     try {
       final user = await fn();
 
       return right(user);
     }
-
     // Supabase Auth errors
     on sb.AuthException catch (e) {
       return left(Failures(e.message));
     }
-
     // Your custom server exceptions
     on ServerExceptions catch (e) {
       return left(Failures(e.message));
     }
-
     // Any unexpected exception
     catch (e) {
       return left(Failures(e.toString()));
