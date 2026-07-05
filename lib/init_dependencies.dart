@@ -84,7 +84,7 @@ Future<void> initDependencies() async {
   // 1. Initialize Supabase First
   final supabase = await Supabase.initialize(
     url: Secrets.supabaseUrl,
-    anonKey: Secrets.supabaseAnon,
+    publishableKey: Secrets.supabaseAnon,
   );
   
   // 2. Register Core Dependencies

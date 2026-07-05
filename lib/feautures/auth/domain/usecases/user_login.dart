@@ -1,3 +1,5 @@
+// ignore_for_file: camel_case_types
+
 import 'package:blog_app/core/errors/failures.dart';
 import 'package:blog_app/core/usecase/usecase.dart';
 import 'package:blog_app/core/common/entities/user.dart';

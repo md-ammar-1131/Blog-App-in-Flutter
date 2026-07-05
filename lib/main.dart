@@ -2,6 +2,7 @@
 import 'package:blog_app/core/common/cubits/app_user/app_user_cubit.dart';
 import 'package:blog_app/core/common/cubits/app_user/app_user_state.dart';
 import 'package:blog_app/core/theme/theme.dart';
+import 'package:blog_app/feautures/Blog/presentation/pages/blog_page.dart';
 
 import 'package:blog_app/feautures/auth/presentation/bloc/auth_bloc.dart';
 import 'package:blog_app/feautures/auth/presentation/pages/login_page.dart';
@@ -72,11 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
       builder: (context, isLoggedIn) {
         if (isLoggedIn) {
           // If true, show the home page center text
-          return const Scaffold(
-            body: Center(
-              child: Text("logged in"),
-            ),
-          );
+          return const BlogPage();
         }
         // If false, show the login page
         return const LoginPage();

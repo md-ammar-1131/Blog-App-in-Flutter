@@ -10,7 +10,7 @@ class AppUserCubit extends Cubit<AppUserState> {
   void updateUser(User? user) {
     if (user == null) {
       emit(AppUserInitial());
-      //if user logs out se again send them back to initial sttae as inititial stea is lagged out state
+      //if user logs out se again send them back to initial state as initial state is logged out state
     } else {
       emit(AppUserLoggedIn(user));
     }
