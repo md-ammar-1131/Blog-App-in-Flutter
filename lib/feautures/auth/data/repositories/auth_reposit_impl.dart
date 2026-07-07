@@ -95,6 +95,21 @@ class AuthRepositImpl implements AuthRepository {
       return left(Failures(e.toString()));
     }
   }
+ @override
+Future<Either<Failures, void>> logout() async {
+  try {
+    await remoteDataSource.logout();
+    return right(null);
+  } catch (e) {
+    return left(Failures(e.toString()));
+  }
+}
+  
+
+
+
+
+  
 }
 // // import 'package:blog_app/core/errors/exceptions.dart';
 // // import 'package:blog_app/core/errors/failures.dart';

@@ -18,6 +18,7 @@ abstract interface class AuthRepository {
   
   });
   Future<Either<Failures,User>>currentUser();
+   Future<Either<Failures, void>> logout();
   //  THE ABOVE TWO FUNCTION WILL DERIVE THE USER DATA FROM THE SUPABASE DATABASE SERVER WHICH IS ASYNCHRONOUS OR TAKE TAIME AND SO WE ARE USING FUTURE FUNNCTION FOT HIS 
   // if success we will return user model
 }

@@ -6,6 +6,9 @@ import 'package:blog_app/feautures/Blog/presentation/bloc/blog_event.dart';
 import 'package:blog_app/feautures/Blog/presentation/pages/blog_add_new_page.dart';
 import 'package:blog_app/feautures/Blog/presentation/pages/colors_card.dart';
 import 'package:blog_app/feautures/Blog/presentation/widgets/blog_card.dart';
+import 'package:blog_app/feautures/auth/data/datasources/auth_remote_data_source.dart';
+import 'package:blog_app/feautures/auth/presentation/bloc/auth_bloc.dart';
+import 'package:blog_app/feautures/auth/presentation/pages/login_page.dart';
 // import 'package:blog_app/main.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -21,40 +24,61 @@ class BlogPage extends StatefulWidget {
 }
 
 class _BlogPageState extends State<BlogPage> {
+  
   @override
   void initState() {
     super.initState();
     context.read<BlogBloc>().add(BlogFetchAllblogs());
   }
+@override
+Widget build(BuildContext context) {
+  return BlocListener<AuthBloc, AuthState>(
+    listener: (context, state) {
+      if (state is AuthLogoutSuccess) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          LoginPage.route(),
+          (route) => false,
+        );
+      }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+      if (state is AuthFailure) {
+        showSnackBar(context, state.message);
+      }
+    },
+    child: Scaffold(
       appBar: AppBar(
-        title: Text('blog app'),
+        title: const Text('Blog App'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+       onPressed: () {
+  print("Logout button pressed");
+  context.read<AuthBloc>().add(AuthLogout());
+},
+          ),
           IconButton(
             onPressed: () {
               Navigator.push(context, BlogAddNewPage.route());
             },
-            icon: Icon(CupertinoIcons.add_circled),
+            icon: const Icon(CupertinoIcons.add_circled),
           ),
         ],
       ),
-      //BLOG SHOWING-----------------------------------------------------------
       body: BlocConsumer<BlogBloc, BlogState>(
         listener: (context, state) {
           if (state is BlogFailure) {
             showSnackBar(context, state.error);
           }
-          // TODO: implement listener
         },
         builder: (context, state) {
           if (state is BlogLoading) {
             return const Loader();
           }
+
           if (state is BlogSuccessDisplay) {
             return ListView.builder(
+              itemCount: state.blogs.length,
               itemBuilder: (context, index) {
                 final blog = state.blogs[index];
                 return BlogCart(
@@ -62,12 +86,12 @@ class _BlogPageState extends State<BlogPage> {
                   color: colors[index % colors.length],
                 );
               },
-              itemCount: state.blogs.length,
             );
           }
-          return SizedBox(height: 60);
+
+          return const SizedBox.shrink();
         },
       ),
-    );
-  }
-}
+    ),
+  );
+}}
