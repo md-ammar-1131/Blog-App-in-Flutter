@@ -1,72 +1,14 @@
-// import 'package:blog_app/core/common/cubits/app_user/app_user_cubit.dart';
-// import 'package:blog_app/core/secrets/secrets.dart';
-// import 'package:blog_app/feautures/auth/data/datasources/auth_remote_data_source.dart';
-// import 'package:blog_app/feautures/auth/data/repositories/auth_reposit_impl.dart';
-// import 'package:blog_app/feautures/auth/domain/repository/auth_repository.dart';
-// import 'package:blog_app/feautures/auth/domain/usecases/current_user.dart';
-// import 'package:blog_app/feautures/auth/domain/usecases/user_Sign_up.dart';
-// import 'package:blog_app/feautures/auth/domain/usecases/user_login.dart';
-// import 'package:blog_app/feautures/auth/presentation/bloc/auth_bloc.dart';
-// import 'package:get_it/get_it.dart';
-// import 'package:supabase_flutter/supabase_flutter.dart'
-//     show Supabase, SupabaseClient;
-
-// //now registering the depencdency with getit
-// final serviceLocator = GetIt.instance;
-
-// Future<void> initDependencies() async {
-//   _initAuth(); //registered dependencies are called here
-//   //FIRSTLY PULL SUPABSE FROM MAIN TO HERE SO THAT SERVICELOACTOR CAN GET IT FROM HERE DIRECTY
-
-//   final supabase = await Supabase.initialize(
-//     url: Secrets.supabaseUrl,
-//     anonKey: Secrets.supabaseAnon,
-//   );
-//   //register factory every time new - wherenver you ask a new instance is created
-//   //need to be created on demand not so general
-//   ////the below getit will give the same instance or we can say it will make a single instrncce of supabase
-//   ///
-//   ///
-//   serviceLocator.registerLazySingleton(() => supabase.client);
-
-//   //core
-//     serviceLocator.registerLazySingleton(() =>AppUserCubit);
-
-// }
-
-// void _initAuth() {
-//   serviceLocator.registerFactory<AuthRemoteDataSource>(
-//     //we are passign generic type of this instance so that furthre taking of this will become easier
-//     () => AuthRemoteDataSourceImplementation(serviceLocator<SupabaseClient>()),
-//   );
-//   //every single time the new implementation of auth remote data source database client
-//   //HOW it sees authimplement it needs supabase clinea an we passed same type object this client he searhces this supabase cliend and take this and put it here we are not rewuired to mention the type it will search and pastr it here
-
-//   //wont b accesbile outside this file
-
-//   //now for auth repository implementation we will register to getit service locator
-//   serviceLocator.registerFactory<AuthRepository>(
-//     () => AuthRepositImpl(serviceLocator<AuthRemoteDataSource>()),
-//   );
-
-//   //USER SIGNUP SERVICE LOACTOR;
-//   serviceLocator.registerFactory(() => UserSignUp(serviceLocator()));
-//   //authbloc one state as one state of bloc is only requried at particluar time so noe new instance is required so lazy singleton reigisteratoin isued here
-
-//   serviceLocator.registerFactory(() => UserLogin(serviceLocator()));
-//   //registering the current user 
-//   serviceLocator.registerFactory(() => CurrentUser(serviceLocator()));
-
-//   serviceLocator.registerLazySingleton(
-//     () => AuthBloc(userSignUp: serviceLocator(), userLogin: serviceLocator(),currentUser: serviceLocator(),appUserCubit: serviceLocator()),
-
-//   );
-
-//   //to use the dependency we must need to first register that depe.. here and then calling or using that dependency becomes easier like we have done by dircly cally serivcelocator();
-// }
-
 import 'package:blog_app/core/common/cubits/app_user/app_user_cubit.dart';
+import 'package:blog_app/core/network/connection_checker.dart';
 import 'package:blog_app/core/secrets/secrets.dart';
+
+import 'package:blog_app/feautures/Blog/data/datasources/blog_remote_data_source.dart';
+import 'package:blog_app/feautures/Blog/data/repositories/blog_repo_impl.dart';
+import 'package:blog_app/feautures/Blog/domain/repositories/blog_repositories.dart';
+import 'package:blog_app/feautures/Blog/domain/usecases/get_all_blogs.dart';
+import 'package:blog_app/feautures/Blog/domain/usecases/upload_blog.dart';
+import 'package:blog_app/feautures/Blog/presentation/bloc/blog_bloc.dart';
+
 import 'package:blog_app/feautures/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:blog_app/feautures/auth/data/repositories/auth_reposit_impl.dart';
 import 'package:blog_app/feautures/auth/domain/repository/auth_repository.dart';
@@ -74,52 +16,113 @@ import 'package:blog_app/feautures/auth/domain/usecases/current_user.dart';
 import 'package:blog_app/feautures/auth/domain/usecases/user_Sign_up.dart';
 import 'package:blog_app/feautures/auth/domain/usecases/user_login.dart';
 import 'package:blog_app/feautures/auth/presentation/bloc/auth_bloc.dart';
+
 import 'package:get_it/get_it.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'
     show Supabase, SupabaseClient;
 
 final serviceLocator = GetIt.instance;
 
 Future<void> initDependencies() async {
-  // 1. Initialize Supabase First
   final supabase = await Supabase.initialize(
     url: Secrets.supabaseUrl,
     publishableKey: Secrets.supabaseAnon,
   );
-  
-  // 2. Register Core Dependencies
-  serviceLocator.registerLazySingleton(() => supabase.client);
-  
-  // FIXED: Added () to instantiate the Cubit
-  serviceLocator.registerLazySingleton(() => AppUserCubit()); 
 
-  // 3. Register Feature Dependencies (Now that core is ready)
-  _initAuth(); 
+  serviceLocator.registerLazySingleton<SupabaseClient>(
+    () => supabase.client,
+  );
+
+  serviceLocator.registerLazySingleton(
+    () => AppUserCubit(),
+  );
+
+  serviceLocator.registerLazySingleton(
+    () => InternetConnection(),
+  );
+
+  serviceLocator.registerLazySingleton<ConnectionChecker>(
+    () => ConnectionCheckerImpl(
+      serviceLocator<InternetConnection>(),
+    ),
+  );
+
+  _initAuth();
+  _initBlog();
 }
 
 void _initAuth() {
-  // Data Source
   serviceLocator.registerFactory<AuthRemoteDataSource>(
-    () => AuthRemoteDataSourceImplementation(serviceLocator<SupabaseClient>()),
+    () => AuthRemoteDataSourceImplementation(
+      serviceLocator<SupabaseClient>(),
+    ),
   );
 
-  // Repository
   serviceLocator.registerFactory<AuthRepository>(
-    () => AuthRepositImpl(serviceLocator<AuthRemoteDataSource>()),
+    () => AuthRepositImpl(
+      serviceLocator<AuthRemoteDataSource>(),
+      serviceLocator<ConnectionChecker>(),
+    ),
   );
 
-  // Use Cases
-  serviceLocator.registerFactory(() => UserSignUp(serviceLocator()));
-  serviceLocator.registerFactory(() => UserLogin(serviceLocator()));
-  serviceLocator.registerFactory(() => CurrentUser(serviceLocator()));
+  serviceLocator.registerFactory(
+    () => UserSignUp(
+      serviceLocator<AuthRepository>(),
+    ),
+  );
 
-  // Bloc
+  serviceLocator.registerFactory(
+    () => UserLogin(
+      serviceLocator<AuthRepository>(),
+    ),
+  );
+
+  serviceLocator.registerFactory(
+    () => CurrentUser(
+      serviceLocator<AuthRepository>(),
+    ),
+  );
+
   serviceLocator.registerLazySingleton(
     () => AuthBloc(
-      userSignUp: serviceLocator(),
-      userLogin: serviceLocator(),
-      currentUser: serviceLocator(),
-      appUserCubit: serviceLocator(),
+      userSignUp: serviceLocator<UserSignUp>(),
+      userLogin: serviceLocator<UserLogin>(),
+      currentUser: serviceLocator<CurrentUser>(),
+      appUserCubit: serviceLocator<AppUserCubit>(),
+    ),
+  );
+}
+
+void _initBlog() {
+  serviceLocator.registerFactory<BlogRemoteDataSource>(
+    () => BlogRemoteDataSourceImplmn(
+      serviceLocator<SupabaseClient>(),
+    ),
+  );
+
+  serviceLocator.registerFactory<BlogRepositories>(
+    () => BlogRepoImpl(
+      serviceLocator<BlogRemoteDataSource>(),
+    ),
+  );
+
+  serviceLocator.registerFactory(
+    () => UploadBlog(
+      serviceLocator<BlogRepositories>(),
+    ),
+  );
+
+  serviceLocator.registerFactory(
+    () => GetAllBlogs(
+      serviceLocator<BlogRepositories>(),
+    ),
+  );
+
+  serviceLocator.registerLazySingleton(
+    () => BlogBloc(
+      uploadblog: serviceLocator<UploadBlog>(),
+      getAllblogs: serviceLocator<GetAllBlogs>(),
     ),
   );
 }

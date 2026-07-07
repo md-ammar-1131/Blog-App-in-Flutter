@@ -22,6 +22,14 @@ class BlogEditor extends StatelessWidget {
       keyboardType: TextInputType.multiline,
       minLines: minLines,
       maxLines: maxLines,
+      validator: (value){
+        if(value!.isEmpty){
+          return '$hintText is missing';
+
+        }
+        return null;
+
+      },
       decoration: InputDecoration(
         hintText: hintText,
       ),

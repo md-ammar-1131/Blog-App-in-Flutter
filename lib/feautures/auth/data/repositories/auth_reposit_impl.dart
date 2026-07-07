@@ -1,7 +1,9 @@
 import 'package:blog_app/core/errors/exceptions.dart';
 import 'package:blog_app/core/errors/failures.dart';
+import 'package:blog_app/core/network/connection_checker.dart';
 import 'package:blog_app/feautures/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:blog_app/core/common/entities/user.dart';
+import 'package:blog_app/feautures/auth/data/models/user_models.dart';
 import 'package:blog_app/feautures/auth/domain/repository/auth_repository.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as sb;
@@ -9,13 +11,28 @@ import 'package:supabase_flutter/supabase_flutter.dart' as sb;
 class AuthRepositImpl implements AuthRepository {
   // Dependency Injection
   final AuthRemoteDataSource remoteDataSource;
+  final ConnectionChecker connectionChecker;
 
-  AuthRepositImpl(this.remoteDataSource);
+  AuthRepositImpl(this.remoteDataSource, this.connectionChecker);
   @override
   Future<Either<Failures, User>> currentUser() async {
     try {
       //AGAR MAIN DOBARA  APP PE AAOUN TO JO LAST LOGGED IN USER THA WO ALREADY AGAIN LGOGED IN HO JAYE
-      
+      if (!(await connectionChecker.isConnected)) {
+        final session = remoteDataSource.currentUserSession;
+
+        if (session == null) {
+          return left(Failures('user not logged in'));
+        } else {
+          return right(
+            UserModels(
+              name: '',
+              email: session.user.email??'',//if email  is not present return empty string 
+              id: session.user.id,
+            ),
+          );
+        }
+      }
       final user = await remoteDataSource.getCurrentUserData();
       if (user == null) {
         return left(Failures('User Not logged in!'));
@@ -58,6 +75,9 @@ class AuthRepositImpl implements AuthRepository {
   // Common handler for login/signup
   Future<Either<Failures, User>> _getUser(Future<User> Function() fn) async {
     try {
+      if (!(await connectionChecker.isConnected)) {
+        left(Failures('No internet Connection'));
+      }
       final user = await fn();
 
       return right(user);

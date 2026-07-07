@@ -28,7 +28,9 @@ class AuthRemoteDataSourceImplementation implements AuthRemoteDataSource {
   supabaseClient; //THIS FILE WILL REGAIN DATA FROM THE SUPABASE SERVER
   //no dependency between class and supabase  and second reaseonf is of testing why we are not directly passing client but taking in constructor
   @override
-  Session? get currentUserSession => supabaseClient.auth.currentSession;
+  Session? get currentUserSession => supabaseClient.auth.currentSession;//we made GETER TOGET CURENT USER SESSION
+  
+  //session variable is used to check current user session
   //this is session method to check if user is still logged in
   //so we will fetch dat from database
 
