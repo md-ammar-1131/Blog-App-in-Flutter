@@ -1,1 +1,1 @@
-A full-stack Flutter Blog Application built using Clean Architecture principles. The application allows users to authenticate, create blogs, upload images, and read blog posts while maintaining a scalable and maintainable codebase.
+A full-stack Flutter Blog Application built using Clean Architecture principles. The application allows users to authenticate, create blogs, upload images, and read blog posts while maintaining a scalable and maintainable codebase.Done
